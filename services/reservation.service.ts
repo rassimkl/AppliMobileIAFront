@@ -1,5 +1,15 @@
 import api from "./api";
 
+export interface Reservation {
+  id: number;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  userEmail: string;
+  courseTitle: string;
+  planPrice: number;
+  createdAt: string; // LocalDateTime → string en JSON
+  paid: boolean;
+}
+
 export const createReservation = async (planId: number) => {
   const response = await api.post(`/reservations/${planId}`);
   return response.data;

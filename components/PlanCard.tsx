@@ -23,64 +23,88 @@ export default function PlanCard({
   const isAdmin = auth?.user?.role === "ADMIN";
   const isStudent = auth?.user?.role === "ETUDIANT";
 
+  const formatLevel = (level: string) => {
+  if (level === "ALL") return "Tous les niveaux";
+  return level;
+};
+
   return (
-    <View style={styles.card}>
+  <View style={styles.card}>
 
-      <Text style={styles.title}>
-        {plan.courseTitle}
-      </Text>
+    {/* Header */}
+    <View style={styles.headerRow}>
+      <Text style={styles.title}>{plan.courseTitle}</Text>
 
-      <Text>Langue: {plan.language}</Text>
-      <Text>Niveau: {plan.level}</Text>
-      <Text>Heures: {plan.numberOfHours}</Text>
-      <Text>Type: {plan.type}</Text>
+      <View
+        style={[
+          styles.typeBadge,
+          plan.type === "GROUP"
+            ? styles.groupBadge
+            : styles.individualBadge
+        ]}
+      >
+        <Text style={styles.badgeText}>
+          {plan.type}
+        </Text>
+      </View>
+    </View>
+
+    {/* Infos */}
+    
+    <View style={styles.infoBlock}>
+      <Text style={styles.infoText}> Niveau • {formatLevel(plan.level)} </Text>
+      <Text style={styles.infoText}>Durée • {plan.numberOfHours}h</Text>
 
       {plan.type === "GROUP" && (
-        <Text>Max participants: {plan.maxParticipants}</Text>
+        <Text style={styles.infoText}>
+          Max • {plan.maxParticipants} participants
+        </Text>
       )}
-
-      <Text style={styles.price}>
-        Prix: {plan.price} €
-      </Text>
-
-      {/* ETUDIANT */}
-      {isStudent && (
-        <TouchableOpacity
-          style={styles.reserveButton}
-          onPress={() => onReserve?.(plan.id)}
-        >
-          <Text style={styles.reserveText}>
-            Demander réservation
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {/* ADMIN */}
-      {isAdmin && (
-        <View style={styles.adminRow}>
-
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() =>
-              router.push({
-                pathname: "/plans/edit/[id]",
-                params: { id: String(plan.id) }
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Modifier</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => onDelete?.(plan.id)}
-          >
-            <Text style={styles.buttonText}>Supprimer</Text>
-          </TouchableOpacity>
-
-        </View>
-      )}
-
     </View>
-  );
+
+    {/* Prix */}
+    <Text style={styles.price}>
+      {plan.price} €
+    </Text>
+
+    {/* ETUDIANT */}
+    {isStudent && (
+      <TouchableOpacity
+        style={styles.reserveButton}
+        onPress={() => onReserve?.(plan.id)}
+      >
+        <Text style={styles.reserveText}>
+          Réserver
+        </Text>
+      </TouchableOpacity>
+    )}
+
+    {/* ADMIN */}
+    {isAdmin && (
+      <View style={styles.adminRow}>
+
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() =>
+            router.push({
+              pathname: "/plans/edit/[id]",
+              params: { id: String(plan.id) }
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Modifier</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => onDelete?.(plan.id)}
+        >
+          <Text style={styles.buttonText}>Supprimer</Text>
+        </TouchableOpacity>
+
+      </View>
+    )}
+
+  </View>
+);
 }

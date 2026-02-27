@@ -71,6 +71,12 @@ export const editCourseStyles = StyleSheet.create({
     marginTop: 10,
   },
 
+    loadingText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#64748B",
+  },
+
   buttonText: {
     color: "white",
     fontWeight: "bold",

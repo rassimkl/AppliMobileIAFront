@@ -8,15 +8,16 @@ import {
   View
 } from "react-native";
 
+import { ImageBackground } from "react-native";
 import DashboardLayout from "../../components/DashboardLayout";
 import ProtectedPage from "../../components/ProtectedPage";
-import api from "../../services/api";
 import { payReservation } from "../../services/payment.service";
+import { getMyReservations, Reservation } from "../../services/reservation.service";
 import { studentReservationStyles as styles } from "../../styles/studentReservation.styles";
 
 export default function EtudiantReservations() {
 
-  const [reservations, setReservations] = useState<any[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,8 +26,8 @@ export default function EtudiantReservations() {
 
   const fetchReservations = async () => {
     try {
-      const response = await api.get("/reservations/my");
-      setReservations(response.data);
+      const data = await getMyReservations();
+      setReservations(data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -46,6 +47,13 @@ export default function EtudiantReservations() {
 
   return (
     <ProtectedPage allowedRoles={["ETUDIANT"]}>
+
+            <ImageBackground
+              source={require("../../assets/images/vb.jpg")}
+              style={styles.background}
+              resizeMode="cover"
+            >
+
       <DashboardLayout title="Mes Réservations">
 
         {loading ? (
@@ -57,14 +65,29 @@ export default function EtudiantReservations() {
               <View key={res.id} style={styles.card}>
 
                 <Text style={styles.title}>
-                  {res.plan.course.title}
+                  {res.courseTitle}
                 </Text>
 
-                <Text>Prix : {res.plan.price} €</Text>
+                <Text style={{ 
+                  fontSize: 20, 
+                  fontWeight: "700", 
+                  color: "#1D4ED8",
+                  marginBottom: 6
+                }}>
+                  {res.planPrice} €
+                </Text>
 
                 <Text style={styles.status}>
                   Statut : {res.status}
                 </Text>
+
+                {res.paid && (
+                  <View style={styles.paidBadge}>
+                    <Text style={styles.paidText}>
+                      PAYÉ
+                    </Text>
+                  </View>
+                )}
 
                 {res.status === "APPROVED" && (
                   <TouchableOpacity
@@ -84,6 +107,8 @@ export default function EtudiantReservations() {
         )}
 
       </DashboardLayout>
+
+      </ImageBackground>
     </ProtectedPage>
   );
 }

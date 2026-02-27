@@ -8,7 +8,7 @@ interface Props {
   id: number;
   title: string;
   description: string;
-  language?: string;
+  langueName?: string;
   onDelete?: (id: number) => void;
 }
 
@@ -16,7 +16,7 @@ export default function CourseCard({
   id,
   title,
   description,
-  language,
+  langueName,
   onDelete,
 }: Props) {
 
@@ -66,12 +66,12 @@ export default function CourseCard({
         )}
       </View>
 
-      {language && (
-        <Image
-          source={{ uri: getFlag(language) || undefined }}
-          style={styles.flag}
-        />
-      )}
+    {langueName && (
+      <Image
+        source={{ uri: getFlag(langueName) || undefined }}
+        style={styles.flag}
+      />
+    )}
 
     </View>
   );

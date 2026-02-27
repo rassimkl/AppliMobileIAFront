@@ -1,13 +1,22 @@
 import { useRouter } from "expo-router";
+import { ImageBackground } from "react-native";
 import DashboardLayout from "../../components/DashboardLayout";
 import FeatureCard from "../../components/FeatureCard";
 import ProtectedPage from "../../components/ProtectedPage";
+import { studentDashboardStyles as styles } from "../../styles/studentDashboard.styles";
 
 export default function EtudiantDashboard() {
   const router = useRouter();
 
   return (
     <ProtectedPage allowedRoles={["ETUDIANT"]}>
+
+      <ImageBackground
+        source={require("../../assets/images/vb.jpg")}
+        style={styles.background}
+        resizeMode="cover"
+      >    
+
       <DashboardLayout title="Espace Étudiant">
         
         <FeatureCard
@@ -35,6 +44,8 @@ export default function EtudiantDashboard() {
         />
 
       </DashboardLayout>
+
+      </ImageBackground>
     </ProtectedPage>
   );
 }

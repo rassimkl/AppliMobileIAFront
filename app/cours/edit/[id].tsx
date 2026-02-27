@@ -1,13 +1,26 @@
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { editCourseStyles as styles } from "../../../styles/editCourse.styles";
+import {
+  Alert,
+  ImageBackground,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
+import DashboardLayout from "../../../components/DashboardLayout";
+import ProtectedPage from "../../../components/ProtectedPage";
+
+import api from "../../../services/api";
 import {
   getCourseById,
   updateCourse
 } from "../../../services/course.service";
+
+import { editCourseStyles as styles } from "../../../styles/editCourse.styles";
 
 export default function EditCourse() {
 
@@ -16,38 +29,57 @@ export default function EditCourse() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [language, setLanguage] = useState("");
   const [level, setLevel] = useState("");
 
+  const [langues, setLangues] = useState<any[]>([]);
+  const [langueId, setLangueId] = useState<number | null>(null);
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetchCourse();
+    fetchData();
   }, []);
 
-  const fetchCourse = async () => {
+  const fetchData = async () => {
     try {
-      const data = await getCourseById(Number(id));
+      const [langueRes, courseRes] = await Promise.all([
+        api.get("/langues"),
+        getCourseById(Number(id))
+      ]);
 
-      setTitle(data.title);
-      setDescription(data.description);
-      setLanguage(data.language);
-      setLevel(data.level);
+      setLangues(langueRes.data);
+
+      const course = courseRes;
+
+      setTitle(course.title);
+      setDescription(course.description);
+      setLangueId(course.langueId);
+      setLevel(course.level);
 
     } catch (error) {
       Alert.alert("Erreur", "Impossible de charger le cours");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdate = async () => {
+
+    if (!title || !description || !langueId) {
+      Alert.alert("Erreur", "Tous les champs sont obligatoires");
+      return;
+    }
+
     try {
       await updateCourse(Number(id), {
         title,
         description,
-        language,
+        langueId,
         level,
       });
 
       Alert.alert("Succès", "Cours modifié !");
-      router.push("/cours");
+      router.replace("/cours");
 
     } catch (error) {
       Alert.alert("Erreur", "Impossible de modifier le cours");
@@ -55,65 +87,89 @@ export default function EditCourse() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
+    <ProtectedPage allowedRoles={["ADMIN"]}>
 
-        <Text style={styles.title}>Modifier le cours</Text>
+      <ImageBackground
+        source={require("../../../assets/images/vb2.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.8 }}
+      >      
 
-        <Text style={styles.label}>Titre</Text>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          style={styles.input}
-        />
+      <DashboardLayout title="Modifier le cours">
 
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          value={description}
-          onChangeText={setDescription}
-          style={styles.textArea}
-          multiline
-        />
+        {loading ? (
+          <Text style={styles.loadingText}>Chargement...</Text>
+        ) : (
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <View style={styles.card}>
 
-        <Text style={styles.label}>Langue</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={language}
-            onValueChange={(itemValue) => setLanguage(itemValue)}
-          >
-            <Picker.Item label="Anglais" value="EN" />
-            <Picker.Item label="Français" value="FR" />
-            <Picker.Item label="Espagnol" value="ES" />
-            <Picker.Item label="Portugais" value="PT" />
-            <Picker.Item label="Basque" value="EU" />
-            <Picker.Item label="Arabe" value="AR" />
-            <Picker.Item label="Japonais" value="JA" />
-            <Picker.Item label="Chinois" value="ZH" />
-            <Picker.Item label="Russe" value="RU" />
-            <Picker.Item label="Allemand" value="DE" />
-          </Picker>
-        </View>
+              <Text style={styles.title}>Modifier le cours</Text>
 
-        <Text style={styles.label}>Niveau</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={level}
-            onValueChange={(itemValue) => setLevel(itemValue)}
-          >
-            <Picker.Item label="A1" value="A1" />
-            <Picker.Item label="A2" value="A2" />
-            <Picker.Item label="B1" value="B1" />
-            <Picker.Item label="B2" value="B2" />
-            <Picker.Item label="C1" value="C1" />
-            <Picker.Item label="Tous les niveaux" value="ALL" />
-          </Picker>
-        </View>
+              <Text style={styles.label}>Titre</Text>
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                style={styles.input}
+              />
 
-        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-          <Text style={styles.buttonText}>Mettre à jour</Text>
-        </TouchableOpacity>
+              <Text style={styles.label}>Description</Text>
+              <TextInput
+                value={description}
+                onChangeText={setDescription}
+                style={styles.textArea}
+                multiline
+              />
 
-      </View>
-    </View>
+              <Text style={styles.label}>Langue</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={langueId}
+                  onValueChange={(itemValue) =>
+                    setLangueId(Number(itemValue))
+                  }
+                >
+                  {langues.map((langue) => (
+                    <Picker.Item
+                      key={langue.id}
+                      label={langue.name}
+                      value={langue.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+
+              <Text style={styles.label}>Niveau</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={level}
+                  onValueChange={(itemValue) => setLevel(itemValue)}
+                >
+                  <Picker.Item label="A1" value="A1" />
+                  <Picker.Item label="A2" value="A2" />
+                  <Picker.Item label="B1" value="B1" />
+                  <Picker.Item label="B2" value="B2" />
+                  <Picker.Item label="C1" value="C1" />
+                  <Picker.Item label="Tous les niveaux" value="ALL" />
+                </Picker>
+              </View>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleUpdate}
+              >
+                <Text style={styles.buttonText}>
+                  Mettre à jour
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+          </ScrollView>
+        )}
+
+      </DashboardLayout>
+
+      </ImageBackground>
+    </ProtectedPage>
   );
 }

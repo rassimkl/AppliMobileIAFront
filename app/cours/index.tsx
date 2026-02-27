@@ -20,116 +20,124 @@ import {
   getCourses
 } from "../../services/course.service";
 
+import {
+  getLangues,
+  Langue
+} from "../../services/langue.service";
+
 export default function CoursPage() {
 
   const auth = useContext(AuthContext);
   const router = useRouter();
-
   const isAdmin = auth?.user?.role === "ADMIN";
 
   const [courses, setCourses] = useState<any[]>([]);
+  const [langues, setLangues] = useState<Langue[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState("ALL");
 
   useEffect(() => {
-    fetchCourses();
+    fetchData();
   }, []);
 
-  const fetchCourses = async () => {
+  const fetchData = async () => {
     try {
-      const data = await getCourses();
-      setCourses(data);
+      const coursesData = await getCourses();
+      const languesData = await getLangues();
+
+      setCourses(coursesData);
+      setLangues(languesData);
+
     } catch (error) {
-      console.log("Erreur récupération cours :", error);
+      console.log("Erreur récupération données :", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔥 Filtrage dynamique (inchangé)
   const filteredCourses =
     selectedLanguage === "ALL"
       ? courses
       : courses.filter(
-          (course) => course.language === selectedLanguage
+          (course) => course.langueName === selectedLanguage
         );
 
   const handleDelete = async (id: number) => {
     try {
       await deleteCourse(id);
-      fetchCourses();
+      fetchData();
     } catch (error: any) {
       console.log("DELETE ERROR:", error);
     }
   };
 
-return (
-  <ProtectedPage allowedRoles={["ADMIN", "ETUDIANT"]}>
-    <ImageBackground
-      source={require("../../assets/images/vb2.jpg")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-      imageStyle={{ opacity: 0.8 }}
-    >
+  return (
+    <ProtectedPage allowedRoles={["ADMIN", "ETUDIANT"]}>
+      <ImageBackground
+        source={require("../../assets/images/vb2.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.8 }}
+      >
 
-      <DashboardLayout title="Cours">
+        <DashboardLayout title="Cours">
 
-        {isAdmin && (
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={() => router.push("/cours/create")}
-          >
-            <Text style={styles.createButtonText}>
-              + Créer un cours
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => router.push("/cours/create")}
+            >
+              <Text style={styles.createButtonText}>
+                + Créer un cours
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 🔥 FILTRE DYNAMIQUE */}
+          <View style={{ marginBottom: 15 }}>
+            <Text style={{ fontWeight: "bold" }}>
+              Filtrer par langue :
             </Text>
-          </TouchableOpacity>
-        )}
 
-        <View style={{ marginBottom: 15 }}>
-          <Text style={{ fontWeight: "bold" }}>
-            Filtrer par langue :
-          </Text>
+            <Picker
+              selectedValue={selectedLanguage}
+              onValueChange={(itemValue) =>
+                setSelectedLanguage(itemValue)
+              }
+            >
+              <Picker.Item label="Toutes les langues" value="ALL" />
 
-          <Picker
-            selectedValue={selectedLanguage}
-            onValueChange={(itemValue) =>
-              setSelectedLanguage(itemValue)
-            }
-          >
-            <Picker.Item label="Toutes les langues" value="ALL" />
-            <Picker.Item label="Anglais" value="EN" />
-            <Picker.Item label="Français" value="FR" />
-            <Picker.Item label="Espagnol" value="ES" />
-            <Picker.Item label="Portugais" value="PT" />
-            <Picker.Item label="Basque" value="EU" />
-            <Picker.Item label="Arabe" value="AR" />
-            <Picker.Item label="Japonais" value="JA" />
-            <Picker.Item label="Chinois" value="ZH" />
-            <Picker.Item label="Russe" value="RU" />
-            <Picker.Item label="Allemand" value="DE" />
-          </Picker>
-        </View>
+              {langues.map((langue) => (
+                <Picker.Item
+                  key={langue.id}
+                  label={langue.name}
+                  value={langue.name}
+                />
+              ))}
 
-        {loading ? (
-          <ActivityIndicator size="large" />
-        ) : filteredCourses.length === 0 ? (
-          <Text>Aucun cours disponible</Text>
-        ) : (
-          filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={course.title}
-              description={course.description}
-              language={course.language}
-              onDelete={handleDelete}
-            />
-          ))
-        )}
+            </Picker>
+          </View>
 
-      </DashboardLayout>
+          {loading ? (
+            <ActivityIndicator size="large" />
+          ) : filteredCourses.length === 0 ? (
+            <Text>Aucun cours disponible</Text>
+          ) : (
+            filteredCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                description={course.description}
+                langueName={course.langueName}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
 
-    </ImageBackground>
-  </ProtectedPage>
-);
+        </DashboardLayout>
+
+      </ImageBackground>
+    </ProtectedPage>
+  );
 }

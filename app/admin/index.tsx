@@ -50,7 +50,7 @@ export default function AdminDashboard() {
           <FeatureCard
             title="Utilisateurs"
             description="Gérer les utilisateurs et rôles"
-            onPress={() => router.push("/")}
+            onPress={() => router.push("/admin/users")}
           />
         </View>
       </ImageBackground>

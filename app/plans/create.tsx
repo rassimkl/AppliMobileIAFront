@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import {
   Alert,
+  ImageBackground,
   ScrollView,
   Text,
   TextInput,
@@ -80,6 +81,14 @@ export default function CreatePlanPage() {
 
   return (
   <ProtectedPage allowedRoles={["ADMIN"]}>
+
+      <ImageBackground
+        source={require("../../assets/images/vb2.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.8 }}
+      >
+
     <DashboardLayout title="Créer un Plan">
 
       <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -96,7 +105,7 @@ export default function CreatePlanPage() {
               {courses.map((course) => (
                 <Picker.Item
                   key={course.id}
-                  label={`${course.title} - ${course.language} - ${course.level}`}
+                  label={`${course.title}`}
                   value={course.id}
                 />
               ))}
@@ -174,6 +183,8 @@ export default function CreatePlanPage() {
       </ScrollView>
 
     </DashboardLayout>
+
+    </ImageBackground>
   </ProtectedPage>
 );
 }

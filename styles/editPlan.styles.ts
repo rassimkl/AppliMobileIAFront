@@ -8,7 +8,7 @@ export const editPlanStyles = StyleSheet.create({
     color: "#334155",
     fontWeight: "600",
   },
-
+  
   card: {
   backgroundColor: "white",
   padding: 25,

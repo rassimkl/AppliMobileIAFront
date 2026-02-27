@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  ImageBackground,
   ScrollView,
   Text,
   TextInput,
@@ -83,6 +84,14 @@ export default function EditPlanPage() {
 
   return (
     <ProtectedPage allowedRoles={["ADMIN"]}>
+
+      <ImageBackground
+        source={require("../../../assets/images/vb2.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.8 }}
+      >
+
       <DashboardLayout title="Modifier le Plan">
 
         {loading ? (
@@ -165,6 +174,8 @@ export default function EditPlanPage() {
         )}
 
       </DashboardLayout>
+
+      </ImageBackground>
     </ProtectedPage>
   );
 }
